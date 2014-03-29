@@ -175,7 +175,7 @@ namespace StudentPiER
         public void TeleoperatedCode()
         {
             //Enable the Rfid Scanner - Press Right Button.
-
+            //The wiki on Rfid is old, do not use it. The API is apparently new though
             /*if (this.robot.FeedbackDigitalVals[5] == true)
             {
                 this.useRfid = true;
