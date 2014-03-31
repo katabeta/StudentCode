@@ -59,25 +59,25 @@ namespace StudentPiER
         /// <summary>
         /// A flag to toggle RFID usage in the code
         /// </summary>
-        /*private bool useRfid;*/
+        //private bool useRfid;
 
         /// <summary>
         /// The rfid sensor
         /// </summary>
-        private Rfid rfid;
+        //private Rfid rfid;
 
         /// <summary>
         /// This is your I2CEncoder
         /// </summary>
         private GrizzlyEncoder leftEncoder;
         private GrizzlyEncoder rightEncoder;
-
+        
+        //Step to use with the ^^ encoder
         private float Step = 0.0125f;
 
-        private int autoStep = 0;
-
+        //Create a new MicroMaestro and servos
         private MicroMaestro mm;
-        private MicroMaestro servo0;
+        private ServoMotor servo0;
 
         /// <summary>
         ///   Initializes a new instance of the
@@ -91,17 +91,17 @@ namespace StudentPiER
             this.robot = robot;
             this.stopwatch = new Stopwatch();
             this.stopwatch.Start();
-            /*this.useRfid = false;
-            if (this.useRfid)
-            {
-                this.rfid = new Rfid(robot);
-            }*/ 
+            //this.useRfid = false;
+            //if (this.useRfid)
+            //{
+            //    this.rfid = new Rfid(robot);
+            //}
             this.leftMotor = new GrizzlyBear(robot, Watson.Motor.M0);
             this.rightMotor = new GrizzlyBear(robot, Watson.Motor.M1);
             this.sonar = new AnalogSonarDistanceSensor(robot, Watson.Analog.A5);
             this.leftEncoder = new GrizzlyEncoder(Step, this.leftMotor, this.robot);
             this.rightEncoder = new GrizzlyEncoder(Step, this.rightMotor, this.robot);
-            }
+        }
             
 
         /// <summary>
@@ -175,75 +175,79 @@ namespace StudentPiER
         public void TeleoperatedCode()
         {
             //Enable the Rfid Scanner - Press Right Button.
-            //The wiki on Rfid is old, do not use it. The API is apparently new though
-            /*if (this.robot.FeedbackDigitalVals[5] == true)
-            {
-                this.useRfid = true;
-                Debug.Print("Scanning of the tag in progress!");
 
-                if (rfid.CurrentItemScanned != null)
-                {
-                    //If we are in the range of a box, find it's info
-                    uint boxItemID;
-                    int boxIDCurrent = rfid.CurrentItemScanned.GroupId;
-                    int boxTypeCurrent = rfid.CurrentItemScanned.GroupType;
+            //if (this.robot.FeedbackDigitalVals[5] == true)
+            //{
+            //    this.useRfid = true;
+            //    Debug.Print("Scanning of the tag in progress!");
 
-                    Debug.Print("ItemID  = " + boxItemID);
-                    Debug.Print("GroupID  = " + boxIDCurrent);
-                    Debug.Print("GroupType  = " + boxIDCurrent);
-                    
-                    this.theBox = new FieldItem(boxItemID, boxIDCurrent, boxTypeCurrent);
+            //    if (rfid.CurrentItemScanned != null)
+            //    {
+            //        //If we are in the range of a box, find it's info
+            //        uint boxItemID = rfid.CurrentItemScanned.ItemID;
+            //        int boxIDCurrent = rfid.CurrentItemScanned.GroupId;
+            //        int boxTypeCurrent = rfid.CurrentItemScanned.GroupType;
 
-                    //Send Rfid Code - Press Left Button
-                    //Allow pilot to choose when to release code
-                    //Automates the process of choosing which code to release
-                    if (this.robot.FeedbackDigitalVals[4] == true)
-                    {
-                        if (boxTypeCurrent == FieldItem.LeftReleaseCode)
-                        {
-                            //release LeftReleaseCode
-                            this.robot.SendReleaseCode();
-                        }
+            //        Debug.Print("ItemID  = " + boxItemID);
+            //        Debug.Print("GroupID  = " + boxIDCurrent);
+            //        Debug.Print("GroupType  = " + boxIDCurrent);
 
-                        if (boxTypeCurrent == FieldItem.RightReleaseCode)
-                        {
-                            //realese RightReleaseCode
-                            this.robot.SendReleaseCode();
-                        }
-                    }
-                }
-                else
-                {
-                    Debug.Print("null");
-                }
+            //        //Send Rfid Code - Press Left Button
+            //        //Allow pilot to choose when to release code
+            //        //Automates the process of choosing which code to release
+            //        if (this.robot.FeedbackDigitalVals[4] == true)
+            //        {
+            //            if (boxTypeCurrent == FieldItem.LeftReleaseCode)
+            //            {
+            //                //release LeftReleaseCode
+            //                this.robot.SendReleaseCode();
+            //            }
 
-                Debug.Print("LastItemScanned:");
-                //Test if we've ever found a box
-                if (rfid.LastItemScanned != null)
-                {
-                    //Info about last scanned item
-                    int boxIdLast = rfid.LastItemScanned.GroupId;
-                    int boxTypeLast = rfid.LastItemScanned.GroupType;
+            //            if (boxTypeCurrent == FieldItem.RightReleaseCode)
+            //            {
+            //                //realese RightReleaseCode
+            //                this.robot.SendReleaseCode();
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        Debug.Print("null");
+            //    }
 
-                    Debug.Print("ItemID  = " + boxItemID);
-                    Debug.Print("GroupID  = " + boxIdLast);
-                    Debug.Print("GroupdType  = " + boxTypeLast);
-                }
-                else
-                {
-                    Debug.Print("null");
-                }
+            //    Debug.Print("LastItemScanned:");
+            //    //Test if we've ever found a box
+            //    if (rfid.LastItemScanned != null)
+            //    {
+            //        //Info about last scanned item
+            //        int boxIdLast = rfid.LastItemScanned.GroupId;
+            //        int boxTypeLast = rfid.LastItemScanned.GroupType;
 
-            }
-            else
-            {
-                this.useRfid = false;
-            }*/
+            //        Debug.Print("ItemID  = " + boxItemID);
+            //        Debug.Print("GroupID  = " + boxIdLast);
+            //        Debug.Print("GroupdType  = " + boxTypeLast);
+            //    }
+            //    else
+            //    {
+            //        Debug.Print("null");
+            //    }
 
-            //New MicroMaestro
+            //}
+            //else
+            //{
+            //    this.useRfid = false;
+            //}
+
+
+            //New MicroMaestros
             mm = new MicroMaestro(robot, 1);
-            //New Servo
-            servo0 = new Servo(robot, mm, 0);
+            //New Servos
+            servo0 = new ServoMotor(robot, mm, 0, 0, 75, 0);
+
+            //if (this.robot.FeedbackDigitalVals[0] == true)
+            //{
+            //    servo0.Write();
+            //}
 
             //Debug.Print("Tele-op " + this.stopwatch.ElapsedTime);
             this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
@@ -338,89 +342,127 @@ namespace StudentPiER
         public void AutonomousCode()
         {
 
-            if (/*some button = true*/)
+            //if (/*some button = true*/)
+            //{
+            //    /*this.leftMotor.Throttle = -60;
+            //    this.rightMotor.Throttle = 60;*/
+
+            //    float leftDisplacement = this.leftEncoder.Displacement;
+            //    float rightDisplacement = this.rightEncoder.Displacement;
+
+            //    //move forward initially
+            //    if (leftDisplacement < 6.0)
+            //    {
+            //        Debug.Print("forward");
+            //        this.rightMotor.Throttle = 90;
+            //        this.leftMotor.Throttle = 90;
+            //    }
+
+            //    //turn right (to get to the goal)
+            //    else if (leftDisplacement < 6.0 + 4.5 * 3.14 )
+            //    {
+            //        Debug.Print("Turn Right");
+            //        this.rightMotor.Throttle = -50;
+            //        this.leftMotor.Throttle = 50;
+            //    }
+
+            //        //move forward
+            //        else if (leftDisplacement < 6.0 + 4.5 * 3.14 + 4.0)
+            //    {
+            //        Debug.Print("forward 2");
+            //        this.rightMotor.Throttle = 90;
+            //        this.leftMotor.Throttle = 90;
+            //    }
+
+            //    //turn left (to face the goal)
+            //    else if (leftDisplacement < 6.0 + 4.5 * 3.14 + 4.0 - 4.5 * 3.14)
+            //    {
+            //        Debug.Print("Turn Left");
+            //        this.rightMotor.Throttle = 50;
+            //        this.leftMotor.Throttle = -50;
+            //    }
+            //}
+
+            //else
+            //{
+            //    /////////////////////////////////////////////////////
+            //    //Mirror for other side of the field
+            //    /*this.leftMotor.Throttle = -60;
+            //    this.rightMotor.Throttle = 60;*/
+
+            //    float leftDisplacement = this.leftEncoder.Displacement;
+            //    float rightDisplacement = this.rightEncoder.Displacement;
+
+            //    //move forward initially
+            //    if (leftDisplacement < 6.0)
+            //    {
+            //        Debug.Print("forward");
+            //        this.rightMotor.Throttle = 90;
+            //        this.leftMotor.Throttle = 90;
+            //    }
+
+            //    //turn left (to get to the goal)
+            //    else if (leftDisplacement < 6.0 - 4.5 * 3.14)
+            //    {
+            //        Debug.Print("Turn Right");
+            //        this.rightMotor.Throttle = -50;
+            //        this.leftMotor.Throttle = 50;
+            //    }
+
+            //    //move forward
+            //    else if (leftDisplacement < 6.0 - 4.5 * 3.14 + 4.0)
+            //    {
+            //        Debug.Print("forward 2");
+            //        this.rightMotor.Throttle = 90;
+            //        this.leftMotor.Throttle = 90;
+            //    }
+
+            //    //turn right (to face the goal)
+            //    else if (leftDisplacement < 6.0 - 4.5 * 3.14 + 4.0 + 4.5 * 3.14)
+            //    {
+            //        Debug.Print("Turn Left");
+            //        this.rightMotor.Throttle = 50;
+            //        this.leftMotor.Throttle = -50;
+            //    }
+            //}
+
+            //Max's set
+            float leftDisplacement = this.leftEncoder.Displacement;
+            float rightDisplacement = this.rightEncoder.Displacement;
+            float TotalDisplacement = Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement);
+
+            this.robot.SendConsoleMessage("TotalDisplacement = " + Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement));
+            
+            
+            //move forward initially
+            if (TotalDisplacement < 40.0)
             {
-                /*this.leftMotor.Throttle = -60;
-                this.rightMotor.Throttle = 60;*/
-
-                float leftDisplacement = this.leftEncoder.Displacement;
-                float rightDisplacement = this.rightEncoder.Displacement;
-
-                //move forward initially
-                if (leftDisplacement < 6.0)
-                {
-                    Debug.Print("forward");
-                    this.rightMotor.Throttle = 90;
-                    this.leftMotor.Throttle = 90;
-                }
-
-                //turn right (to get to the goal)
-                else if (leftDisplacement < 6.0 + 4.5 * 3.14 )
-                {
-                    Debug.Print("Turn Right");
-                    this.rightMotor.Throttle = -50;
-                    this.leftMotor.Throttle = 50;
-                }
-
-                    //move forward
-                    else if (leftDisplacement < 6.0 + 4.5 * 3.14 + 4.0)
-                {
-                    Debug.Print("forward 2");
-                    this.rightMotor.Throttle = 90;
-                    this.leftMotor.Throttle = 90;
-                }
-
-                //turn left (to face the goal)
-                else if (leftDisplacement < 6.0 + 4.5 * 3.14 + 4.0 - 4.5 * 3.14)
-                {
-                    Debug.Print("Turn Left");
-                    this.rightMotor.Throttle = 50;
-                    this.leftMotor.Throttle = -50;
-                }
+                Debug.Print("Forward");
+                this.rightMotor.Throttle = 60;
+                this.leftMotor.Throttle = -60;
+            }
+            //turn right (to get to the goal)
+            else if (TotalDisplacement < 60.0)
+            {
+                Debug.Print("Turn Right");
+                this.rightMotor.Throttle = -90;
+                this.leftMotor.Throttle = -90;
+            }
+            //move forward
+            else if (TotalDisplacement < 80.0)
+            {
+                Debug.Print("Forward 2");
+                this.rightMotor.Throttle = 60;
+                this.leftMotor.Throttle = -60;
+            }
+            //turn left (to face the goal)
+            else if (TotalDisplacement < 100)
+            {
+                Debug.Print("Turn Left");
+                this.rightMotor.Throttle = 90;
+                this.leftMotor.Throttle = 90;
             }
 
-            else
-            {
-                /////////////////////////////////////////////////////
-    	        //Mirror for other side of the field
-                /*this.leftMotor.Throttle = -60;
-                this.rightMotor.Throttle = 60;*/
-
-                float leftDisplacement = this.leftEncoder.Displacement;
-                float rightDisplacement = this.rightEncoder.Displacement;
-
-                //move forward initially
-                if (leftDisplacement < 6.0)
-                {
-                    Debug.Print("forward");
-                    this.rightMotor.Throttle = 90;
-                    this.leftMotor.Throttle = 90;
-                }
-
-                //turn left (to get to the goal)
-                else if (leftDisplacement < 6.0 - 4.5 * 3.14)
-                {
-                    Debug.Print("Turn Right");
-                    this.rightMotor.Throttle = -50;
-                    this.leftMotor.Throttle = 50;
-                }
-
-                //move forward
-                else if (leftDisplacement < 6.0 - 4.5 * 3.14 + 4.0)
-                {
-                    Debug.Print("forward 2");
-                    this.rightMotor.Throttle = 90;
-                    this.leftMotor.Throttle = 90;
-                }
-
-                //turn right (to face the goal)
-                else if (leftDisplacement < 6.0 - 4.5 * 3.14 + 4.0 + 4.5 * 3.14)
-                {
-                    Debug.Print("Turn Left");
-                    this.rightMotor.Throttle = 50;
-                    this.leftMotor.Throttle = -50;
-                }
-            }
 
         }
         
