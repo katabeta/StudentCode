@@ -174,69 +174,69 @@ namespace StudentPiER
 
         public void TeleoperatedCode()
         {
-            //Enable the Rfid Scanner - Press Right Button.
+            Enable the Rfid Scanner - Press Right Button.
 
-            //if (this.robot.FeedbackDigitalVals[5] == true)
-            //{
-            //    this.useRfid = true;
-            //    Debug.Print("Scanning of the tag in progress!");
+            if (this.robot.FeedbackDigitalVals[5] == true)
+            {
+                this.useRfid = true;
+                Debug.Print("Scanning of the tag in progress!");
 
-            //    if (rfid.CurrentItemScanned != null)
-            //    {
-            //        //If we are in the range of a box, find it's info
-            //        uint boxItemID = rfid.CurrentItemScanned.ItemID;
-            //        int boxIDCurrent = rfid.CurrentItemScanned.GroupId;
-            //        int boxTypeCurrent = rfid.CurrentItemScanned.GroupType;
+                if (rfid.CurrentItemScanned != null)
+                {
+                    //If we are in the range of a box, find it's info
+                    uint boxItemID = rfid.CurrentItemScanned.ItemID;
+                    int boxIDCurrent = rfid.CurrentItemScanned.GroupId;
+                    int boxTypeCurrent = rfid.CurrentItemScanned.GroupType;
 
-            //        Debug.Print("ItemID  = " + boxItemID);
-            //        Debug.Print("GroupID  = " + boxIDCurrent);
-            //        Debug.Print("GroupType  = " + boxIDCurrent);
+                    Debug.Print("ItemID  = " + boxItemID);
+                    Debug.Print("GroupID  = " + boxIDCurrent);
+                    Debug.Print("GroupType  = " + boxIDCurrent);
 
-            //        //Send Rfid Code - Press Left Button
-            //        //Allow pilot to choose when to release code
-            //        //Automates the process of choosing which code to release
-            //        if (this.robot.FeedbackDigitalVals[4] == true)
-            //        {
-            //            if (boxTypeCurrent == FieldItem.LeftReleaseCode)
-            //            {
-            //                //release LeftReleaseCode
-            //                this.robot.SendReleaseCode();
-            //            }
+                    //Send Rfid Code - Press Left Button
+                    //Allow pilot to choose when to release code
+                    //Automates the process of choosing which code to release
+                    if (this.robot.FeedbackDigitalVals[4] == true)
+                    {
+                        if (boxTypeCurrent == FieldItem.LeftReleaseCode)
+                        {
+                            //release LeftReleaseCode
+                            this.robot.SendReleaseCode();
+                        }
 
-            //            if (boxTypeCurrent == FieldItem.RightReleaseCode)
-            //            {
-            //                //realese RightReleaseCode
-            //                this.robot.SendReleaseCode();
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        Debug.Print("null");
-            //    }
+                        if (boxTypeCurrent == FieldItem.RightReleaseCode)
+                        {
+                            //realese RightReleaseCode
+                            this.robot.SendReleaseCode();
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.Print("null");
+                }
 
-            //    Debug.Print("LastItemScanned:");
-            //    //Test if we've ever found a box
-            //    if (rfid.LastItemScanned != null)
-            //    {
-            //        //Info about last scanned item
-            //        int boxIdLast = rfid.LastItemScanned.GroupId;
-            //        int boxTypeLast = rfid.LastItemScanned.GroupType;
+                Debug.Print("LastItemScanned:");
+                //Test if we've ever found a box
+                if (rfid.LastItemScanned != null)
+                {
+                    //Info about last scanned item
+                    int boxIdLast = rfid.LastItemScanned.GroupId;
+                    int boxTypeLast = rfid.LastItemScanned.GroupType;
 
-            //        Debug.Print("ItemID  = " + boxItemID);
-            //        Debug.Print("GroupID  = " + boxIdLast);
-            //        Debug.Print("GroupdType  = " + boxTypeLast);
-            //    }
-            //    else
-            //    {
-            //        Debug.Print("null");
-            //    }
+                    Debug.Print("ItemID  = " + boxItemID);
+                    Debug.Print("GroupID  = " + boxIdLast);
+                    Debug.Print("GroupdType  = " + boxTypeLast);
+                }
+                else
+                {
+                    Debug.Print("null");
+                }
 
-            //}
-            //else
-            //{
-            //    this.useRfid = false;
-            //}
+            }
+            else
+            {
+                this.useRfid = false;
+            }
 
 
             //New MicroMaestros
