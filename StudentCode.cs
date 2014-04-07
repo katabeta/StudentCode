@@ -175,7 +175,6 @@ namespace StudentPiER
         public void TeleoperatedCode()
         {
             //Enable the Rfid Scanner - Press Right Button.
-
             if (this.robot.FeedbackDigitalVals[5] == true)
             {
                 this.useRfid = true;
