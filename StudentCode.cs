@@ -274,62 +274,24 @@ namespace StudentPiER
             //Enable the Rfid Scanner - Press Right Button.
             if (this.robot.FeedbackDigitalVals[5] == true)
             {
-                this.useRfid = true;
-                Debug.Print("Scanning of the tag in progress!");
+                
 
                 if (rfid.CurrentItemScanned != null)
                 {
-                    //If we are in the range of a box, find it's info
-                    uint boxItemID = rfid.CurrentItemScanned.ItemId;
-                    int boxIDCurrent = rfid.CurrentItemScanned.GroupId;
-                    int boxTypeCurrent = rfid.CurrentItemScanned.GroupType;
-
-
-                    Debug.Print("ItemID  = " + boxItemID);
-                    Debug.Print("GroupID  = " + boxIDCurrent);
-                    Debug.Print("GroupType  = " + boxIDCurrent);
-
-                    this.fieldItem = new FieldItem(boxItemID, boxIDCurrent, boxTypeCurrent);
+                    
 
                     //Send Rfid Code - Press Left Button
                     //Allow pilot to choose when to release code
                     //Automates the process of choosing which code to release
-                    if (this.robot.FeedbackDigitalVals[4] == true)
-                    {
-                        if (boxTypeCurrent != 0)
-                        {
-                            this.robot.SendReleaseCode(fieldItem);
-                            this.robot.StartFlashingDispenser(fieldItem);
-                        }
-                    }
-                    else
-                    {
-                       Debug.Print("null");
-                    }
-
-                Debug.Print("LastItemScanned:");
-                //Test if we've ever found a box
-                if (rfid.LastItemScanned != null)
-                {
-                    //Info about last successfully scanned item
-                    uint boxItemLast = rfid.LastItemScanned.ItemId;
-                    int boxIdLast = rfid.LastItemScanned.GroupId;
-                    int boxTypeLast = rfid.LastItemScanned.GroupType;
-
-                    Debug.Print("ItemID  = " + boxItemLast);
-                    Debug.Print("GroupID  = " + boxIdLast);
-                    Debug.Print("GroupdType  = " + boxTypeLast);
+                    this.robot.SendReleaseCode(this.rfid.CurrentItemScanned);
+                    this.robot.StartFlashingDispenser(this.rfid.CurrentItemScanned);
                 }
-                else
-                {
-                    Debug.Print("null");
-                }
-
             }
             else
             {   
-                this.robot.StopFlashingDispenser(fieldItem);
-                this.useRfid = false;
+                 Debug.Print("stopRelease");
+                 this.robot.StopFlashingDispenser(this.rfid.CurrentItemScanned);
+                
             }
 
 
