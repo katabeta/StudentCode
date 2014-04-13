@@ -299,13 +299,13 @@ namespace StudentPiER
                         if (boxTypeCurrent != 0)
                         {
                             this.robot.SendReleaseCode(fieldItem);
+                            this.robot.StartFlashingDispenser(fieldItem);
                         }
                     }
-                }
-                else
-                {
-                    Debug.Print("null");
-                }
+                    else
+                    {
+                       Debug.Print("null");
+                    }
 
                 Debug.Print("LastItemScanned:");
                 //Test if we've ever found a box
@@ -327,7 +327,8 @@ namespace StudentPiER
 
             }
             else
-            {
+            {   
+                this.robot.StopFlashingDispenser(fieldItem);
                 this.useRfid = false;
             }
 
