@@ -56,28 +56,52 @@ namespace StudentPiER
         /// </summary>
         private AnalogSonarDistanceSensor sonar;
 
+         /// <summary>
+        /// The motor controlling the position of the hopper, on connector M2
+        /// </summary>
+        private GrizzlyBear hopperMotor;
+
+        /// <summary>
+        /// The motor controlling the converyor belt for the pick-up mechanism, on connector M3
+        /// </summary>
+        private GrizzlyBear conveyorBeltMotor;
+
+
         /// <summary>
         /// A flag to toggle RFID usage in the code
         /// </summary>
-        //private bool useRfid;
+        private bool useRfid;
 
         /// <summary>
         /// The rfid sensor
         /// </summary>
-        //private Rfid rfid;
+        private Rfid rfid;
 
         /// <summary>
         /// This is your I2CEncoder
         /// </summary>
         private GrizzlyEncoder leftEncoder;
         private GrizzlyEncoder rightEncoder;
-        
+
         //Step to use with the ^^ encoder
         private float Step = 0.0125f;
+
+        /// <summary>
+        /// The limit switch for testing if the hopper is open, on connector D1
+        /// </summary>
+        private DigitalLimitSwitch openSwitch;
+
+        /// <summary>
+        /// The limit switch for testing if the hopper is closed, on connector D0
+        /// </summary>
+        private DigitalLimitSwitch closedSwitch;
 
         //Create a new MicroMaestro and servos
         private MicroMaestro mm;
         private ServoMotor servo0;
+
+        //new var for rfid fieldItme
+        public FieldItem fieldItem;
 
         /// <summary>
         ///   Initializes a new instance of the
@@ -91,18 +115,23 @@ namespace StudentPiER
             this.robot = robot;
             this.stopwatch = new Stopwatch();
             this.stopwatch.Start();
-            //this.useRfid = false;
-            //if (this.useRfid)
-            //{
-            //    this.rfid = new Rfid(robot);
-            //}
+            this.useRfid = false;
+            if (this.useRfid)
+            {
+                this.rfid = new Rfid(robot);
+            }
             this.leftMotor = new GrizzlyBear(robot, Watson.Motor.M0);
             this.rightMotor = new GrizzlyBear(robot, Watson.Motor.M1);
             this.sonar = new AnalogSonarDistanceSensor(robot, Watson.Analog.A5);
             this.leftEncoder = new GrizzlyEncoder(Step, this.leftMotor, this.robot);
             this.rightEncoder = new GrizzlyEncoder(Step, this.rightMotor, this.robot);
+            this.closedSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D1);
+            this.openSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D2);
+            this.mm = new MicroMaestro(robot, 1);
+            this.servo0 = new ServoMotor(robot, mm, 0, 0, 75, 0);
+            this.conveyorBeltMotor = new GrizzlyBear(robot, Watson.Motor.M3);
         }
-            
+
 
         /// <summary>
         /// Main method which initializes the robot, and starts
@@ -128,7 +157,7 @@ namespace StudentPiER
             return this.robot;
         }
 
-       
+
         /// <summary>
         /// The robot will call this method every time it needs to run the
         /// user-controlled student code
@@ -136,7 +165,7 @@ namespace StudentPiER
         /// new PiEMOS analog/digital values and then use them to update the
         /// actuator states
         /// </summary>
-        
+
         public void SpeedAdjust()
         {
             double timeStart = this.stopwatch.ElapsedTime;
@@ -171,9 +200,88 @@ namespace StudentPiER
             }
         }
 
+        /// <summary>
+        /// Determines the position of the hopper door based on the activation of limit switches at the top and bottom of the hopper
+        /// </summary>
+        /// <returns></returns> The position of the hopper door: open, closed, or in between
+        public int hopperPosition()
+        {
+            if (this.closedSwitch.IsPressed == true && this.openSwitch.IsPressed == false)
+            {
+                return 1;
+            }
 
+            else if (this.closedSwitch.IsPressed == false && this.openSwitch.IsPressed == true)
+            {
+                return 2;
+            }
+
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Uses the position of the hopper to determine the speed at which the motor should rotate when the driver elects to move the door
+        /// </summary>
+        /// <returns></returns> A value of throttle for the hopper motor
+        public int getTrueHopperThrottle()
+        {
+            if (this.robot.PiEMOSDigitalVals[5] == true && hopperPosition() == 1)
+            {
+                this.robot.SendConsoleMessage("Closed");
+                return -40;
+            }
+            else if (this.robot.PiEMOSDigitalVals[5] == true && hopperPosition() == 2)
+            {
+                this.robot.SendConsoleMessage("Open");
+                return 50;
+            }
+
+            else if (this.robot.PiEMOSDigitalVals[4] == true && hopperPosition() == 2)
+            {
+                this.robot.SendConsoleMessage("Twerk baby twerk");
+                return 30;
+            }
+
+            else if (this.robot.PiEMOSDigitalVals[4] == true && hopperPosition() == 0)
+            {
+                this.robot.SendConsoleMessage("Twerk baby twerk");
+                return 0;
+            }
+
+            else
+            {
+                this.robot.SendConsoleMessage("INCONCLUSIVE YOU IGNORAMUS");
+                return 40;
+            }
+
+        }
+
+
+        /// <summary>
+        /// The robot will call this method every time it needs to run the
+        /// autonomous student code
+        /// The StudentCode should basically treat this as a chance to change motorsw
+        /// and servos based on non user-controlled input like sensors. But you
+        /// don't need sensors, as this example demonstrates.
+        /// </summary>
         public void TeleoperatedCode()
         {
+            this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
+            this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
+
+            this.robot.FeedbackAnalogVals[0] = this.rightMotor.Throttle;
+            this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
+
+            this.robot.FeedbackAnalogVals[6] = (int)this.leftEncoder.Displacement;
+            //this.robot.SendConsoleMessage("Displacement = " + this.rightEncoder.Displacement);
+
+            this.   .Throttle = getTrueHopperThrottle();
+
+            this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[5];
+
             //Enable the Rfid Scanner - Press Right Button.
             if (this.robot.FeedbackDigitalVals[5] == true)
             {
@@ -183,29 +291,25 @@ namespace StudentPiER
                 if (rfid.CurrentItemScanned != null)
                 {
                     //If we are in the range of a box, find it's info
-                    uint boxItemID = rfid.CurrentItemScanned.ItemID;
+                    uint boxItemID = rfid.CurrentItemScanned.ItemId;
                     int boxIDCurrent = rfid.CurrentItemScanned.GroupId;
                     int boxTypeCurrent = rfid.CurrentItemScanned.GroupType;
+
 
                     Debug.Print("ItemID  = " + boxItemID);
                     Debug.Print("GroupID  = " + boxIDCurrent);
                     Debug.Print("GroupType  = " + boxIDCurrent);
+
+                    this.fieldItem = new FieldItem(boxItemID, boxIDCurrent, boxTypeCurrent);
 
                     //Send Rfid Code - Press Left Button
                     //Allow pilot to choose when to release code
                     //Automates the process of choosing which code to release
                     if (this.robot.FeedbackDigitalVals[4] == true)
                     {
-                        if (boxTypeCurrent == FieldItem.LeftReleaseCode)
+                        if (boxTypeCurrent != 0)
                         {
-                            //release LeftReleaseCode
-                            this.robot.SendReleaseCode();
-                        }
-
-                        if (boxTypeCurrent == FieldItem.RightReleaseCode)
-                        {
-                            //realese RightReleaseCode
-                            this.robot.SendReleaseCode();
+                            this.robot.SendReleaseCode(fieldItem);
                         }
                     }
                 }
@@ -218,11 +322,12 @@ namespace StudentPiER
                 //Test if we've ever found a box
                 if (rfid.LastItemScanned != null)
                 {
-                    //Info about last scanned item
+                    //Info about last successfully scanned item
+                    uint boxItemLast = rfid.LastItemScanned.ItemId;
                     int boxIdLast = rfid.LastItemScanned.GroupId;
                     int boxTypeLast = rfid.LastItemScanned.GroupType;
 
-                    Debug.Print("ItemID  = " + boxItemID);
+                    Debug.Print("ItemID  = " + boxItemLast);
                     Debug.Print("GroupID  = " + boxIdLast);
                     Debug.Print("GroupdType  = " + boxTypeLast);
                 }
@@ -239,15 +344,24 @@ namespace StudentPiER
 
 
             //New MicroMaestros
-            mm = new MicroMaestro(robot, 1);
-            //New Servos
-            servo0 = new ServoMotor(robot, mm, 0, 0, 75, 0);
+            mm = new MicroMaestro(robot, 12);
+            //New Servos    
+            servo0 = new ServoMotor(robot, mm, 0, 0, 90, 0);
 
-            //if (this.robot.FeedbackDigitalVals[0] == true)
-            //{
-            //    servo0.Write();
-            //}
+            servo0.AngularSpeed = 75;
+            servo0.TargetRotation = 90;
 
+            if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 90) 
+            {
+                this.servo0.TargetRotation = 0;
+            }
+            else if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 0)
+            {
+                this.servo0.TargetRotation = 90;
+            }
+
+
+          
             //Debug.Print("Tele-op " + this.stopwatch.ElapsedTime);
             this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
             this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
@@ -330,141 +444,58 @@ namespace StudentPiER
         }
 
 
-        /// <summary>
-        /// The robot will call this method every time it needs to run the
-        /// autonomous student code
-        /// The StudentCode should basically treat this as a chance to change motors
-        /// and servos based on non user-controlled input like sensors. But you
-        /// don't need sensors, as this example demonstrates.
-        /// </summary>
-        
+       
         public void AutonomousCode()
         {
-
-            //if (/*some button = true*/)
-            //{
-            //    /*this.leftMotor.Throttle = -60;
-            //    this.rightMotor.Throttle = 60;*/
-
-            //    float leftDisplacement = this.leftEncoder.Displacement;
-            //    float rightDisplacement = this.rightEncoder.Displacement;
-
-            //    //move forward initially
-            //    if (leftDisplacement < 6.0)
-            //    {
-            //        Debug.Print("forward");
-            //        this.rightMotor.Throttle = 90;
-            //        this.leftMotor.Throttle = 90;
-            //    }
-
-            //    //turn right (to get to the goal)
-            //    else if (leftDisplacement < 6.0 + 4.5 * 3.14 )
-            //    {
-            //        Debug.Print("Turn Right");
-            //        this.rightMotor.Throttle = -50;
-            //        this.leftMotor.Throttle = 50;
-            //    }
-
-            //        //move forward
-            //        else if (leftDisplacement < 6.0 + 4.5 * 3.14 + 4.0)
-            //    {
-            //        Debug.Print("forward 2");
-            //        this.rightMotor.Throttle = 90;
-            //        this.leftMotor.Throttle = 90;
-            //    }
-
-            //    //turn left (to face the goal)
-            //    else if (leftDisplacement < 6.0 + 4.5 * 3.14 + 4.0 - 4.5 * 3.14)
-            //    {
-            //        Debug.Print("Turn Left");
-            //        this.rightMotor.Throttle = 50;
-            //        this.leftMotor.Throttle = -50;
-            //    }
-            //}
-
-            //else
-            //{
-            //    /////////////////////////////////////////////////////
-            //    //Mirror for other side of the field
-            //    /*this.leftMotor.Throttle = -60;
-            //    this.rightMotor.Throttle = 60;*/
-
-            //    float leftDisplacement = this.leftEncoder.Displacement;
-            //    float rightDisplacement = this.rightEncoder.Displacement;
-
-            //    //move forward initially
-            //    if (leftDisplacement < 6.0)
-            //    {
-            //        Debug.Print("forward");
-            //        this.rightMotor.Throttle = 90;
-            //        this.leftMotor.Throttle = 90;
-            //    }
-
-            //    //turn left (to get to the goal)
-            //    else if (leftDisplacement < 6.0 - 4.5 * 3.14)
-            //    {
-            //        Debug.Print("Turn Right");
-            //        this.rightMotor.Throttle = -50;
-            //        this.leftMotor.Throttle = 50;
-            //    }
-
-            //    //move forward
-            //    else if (leftDisplacement < 6.0 - 4.5 * 3.14 + 4.0)
-            //    {
-            //        Debug.Print("forward 2");
-            //        this.rightMotor.Throttle = 90;
-            //        this.leftMotor.Throttle = 90;
-            //    }
-
-            //    //turn right (to face the goal)
-            //    else if (leftDisplacement < 6.0 - 4.5 * 3.14 + 4.0 + 4.5 * 3.14)
-            //    {
-            //        Debug.Print("Turn Left");
-            //        this.rightMotor.Throttle = 50;
-            //        this.leftMotor.Throttle = -50;
-            //    }
-            //}
-
+            Debug.Print("Autonomous");
             //Max's set
             float leftDisplacement = this.leftEncoder.Displacement;
             float rightDisplacement = this.rightEncoder.Displacement;
             float TotalDisplacement = Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement);
 
-            this.robot.SendConsoleMessage("TotalDisplacement = " + Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement));
-            
-            
+           
+            this.robot.SendConsoleMessage("LeftDisplacement = " + (int)leftDisplacement);
+            this.robot.SendConsoleMessage("RightDisplacement = " + (int)rightDisplacement);
+            this.robot.SendConsoleMessage("TotalDisplacement = " + (Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement)));
+            int right = -1;
+            //int left = -1;
+
             //move forward initially
-            if (TotalDisplacement < 40.0)
+            if (TotalDisplacement < 20.0)
             {
-                Debug.Print("Forward");
-                this.rightMotor.Throttle = 60;
-                this.leftMotor.Throttle = -60;
+                this.robot.SendConsoleMessage("Forward");
+                this.rightMotor.Throttle = right * 100;
+                this.leftMotor.Throttle = right * -100;
             }
-            //turn right (to get to the goal)
-            else if (TotalDisplacement < 60.0)
+            //turn left (to get to the goal)
+            else if (TotalDisplacement < 100.0)
             {
-                Debug.Print("Turn Right");
-                this.rightMotor.Throttle = -90;
-                this.leftMotor.Throttle = -90;
+                this.robot.SendConsoleMessage("Turn Left");
+                this.rightMotor.Throttle = right * -100;
+                this.leftMotor.Throttle = right * -100;
             }
             //move forward
-            else if (TotalDisplacement < 80.0)
+            else if (TotalDisplacement < 120.0)
             {
-                Debug.Print("Forward 2");
-                this.rightMotor.Throttle = 60;
-                this.leftMotor.Throttle = -60;
+                this.robot.SendConsoleMessage("Forward 2");
+                this.rightMotor.Throttle = right * 100;
+                this.leftMotor.Throttle = right * -100;
             }
-            //turn left (to face the goal)
-            else if (TotalDisplacement < 100)
+            //turn right (to face the goal)
+            else if (TotalDisplacement < 190.0)
             {
-                Debug.Print("Turn Left");
-                this.rightMotor.Throttle = 90;
-                this.leftMotor.Throttle = 90;
+                this.robot.SendConsoleMessage("Turn Right");
+                this.rightMotor.Throttle = right * 100;
+                this.leftMotor.Throttle = right * 100;
             }
 
-
+            else
+            {
+                this.rightMotor.Throttle = 0;
+                this.leftMotor.Throttle = 0;
+            }
         }
-        
+
 
         /// <summary>
         /// The robot will call this method periodically while it is disabled
@@ -474,6 +505,8 @@ namespace StudentPiER
         public void DisabledAutonomousCode()
         {
             this.stopwatch.Reset(); // Restart stopwatch before start of autonomous
+            this.leftEncoder.Displacement = 0;
+            this.rightEncoder.Displacement = 0;
         }
 
         /// <summary>
