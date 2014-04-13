@@ -264,7 +264,7 @@ namespace StudentPiER
             this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[6];
             if (this.robot.FeedbackDigitalVals[6] == true)
             {
-                this.conveyorBeltMotor.Throttle = 50;
+                this.conveyorBeltMotor.Throttle = 100;
             }
             else
             {
