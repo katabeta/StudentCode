@@ -277,9 +277,8 @@ namespace StudentPiER
 
             this.robot.FeedbackAnalogVals[6] = (int)this.leftEncoder.Displacement;
             //this.robot.SendConsoleMessage("Displacement = " + this.rightEncoder.Displacement);
-
-            this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[6];
-            if (this.robot.PiEMOSAnalogVals[6]==true)
+            
+            if (this.robot.FeedbackDigitalVals[6]==true)
             {
                this.conveyorBeltMotor.Throttle=50; 
             }
@@ -287,7 +286,7 @@ namespace StudentPiER
             {
                 this.conveyorBeltMotor.Throttle=0;
             }
-            }
+            
             
             //Enable the Rfid Scanner - Press Right Button.
             if (this.robot.FeedbackDigitalVals[5] == true)
