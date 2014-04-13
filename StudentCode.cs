@@ -228,33 +228,14 @@ namespace StudentPiER
         /// <returns></returns> A value of throttle for the hopper motor
         public int getTrueHopperThrottle()
         {
-            if (this.robot.PiEMOSDigitalVals[5] == true && hopperPosition() == 1)
+            if (this.robot.PiEMOSDigitalVals[5] == true)
             {
-                this.robot.SendConsoleMessage("Closed");
-                return -40;
-            }
-            else if (this.robot.PiEMOSDigitalVals[5] == true && hopperPosition() == 2)
-            {
-                this.robot.SendConsoleMessage("Open");
-                return 50;
-            }
-
-            else if (this.robot.PiEMOSDigitalVals[4] == true && hopperPosition() == 2)
-            {
-                this.robot.SendConsoleMessage("Twerk baby twerk");
-                return 30;
-            }
-
-            else if (this.robot.PiEMOSDigitalVals[4] == true && hopperPosition() == 0)
-            {
-                this.robot.SendConsoleMessage("Twerk baby twerk");
-                return 0;
+                return -20;
             }
 
             else
             {
-                this.robot.SendConsoleMessage("INCONCLUSIVE YOU IGNORAMUS");
-                return 40;
+                return 60;
             }
 
         }
@@ -276,18 +257,20 @@ namespace StudentPiER
             this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
 
             this.robot.FeedbackAnalogVals[6] = (int)this.leftEncoder.Displacement;
-            //this.robot.SendConsoleMessage("Displacement = " + this.rightEncoder.Displacement);
-            
-            if (this.robot.FeedbackDigitalVals[6]==true)
+
+            this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[5];
+
+            //turn on conveyor belt - left stick
+            this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[6];
+            if (this.robot.FeedbackDigitalVals[6] == true)
             {
-               this.conveyorBeltMotor.Throttle=50; 
+                this.conveyorBeltMotor.Throttle = 50;
             }
             else
             {
-                this.conveyorBeltMotor.Throttle=0;
+                this.conveyorBeltMotor.Throttle = 0;
             }
-            
-            
+
             //Enable the Rfid Scanner - Press Right Button.
             if (this.robot.FeedbackDigitalVals[5] == true)
             {
@@ -357,7 +340,7 @@ namespace StudentPiER
             servo0.AngularSpeed = 75;
             servo0.TargetRotation = 90;
 
-            if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 90) 
+            if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 90)
             {
                 this.servo0.TargetRotation = 0;
             }
@@ -367,7 +350,7 @@ namespace StudentPiER
             }
 
 
-          
+
             //Debug.Print("Tele-op " + this.stopwatch.ElapsedTime);
             this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
             this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
@@ -399,58 +382,8 @@ namespace StudentPiER
                 this.rightMotor.Throttle = (this.robot.PiEMOSAnalogVals[3] - this.robot.PiEMOSAnalogVals[0]);
                 this.leftMotor.Throttle = (this.robot.PiEMOSAnalogVals[3] + this.robot.PiEMOSAnalogVals[0]);
             }
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //Slow Mode - Left Stick
-            if (this.robot.PiEMOSDigitalVals[6] == true)
-            {
-
-                //Tank Mode - Press Right Stick
-                if (this.robot.PiEMOSDigitalVals[7] == false)
-                {
-                    this.rightMotor.Throttle = (int)(this.robot.PiEMOSAnalogVals[1] * 0.4) + 40;
-                    this.leftMotor.Throttle = (int)(this.robot.PiEMOSAnalogVals[3] * 0.4) - 40;
-
-
-                    this.robot.FeedbackAnalogVals[0] = this.rightMotor.Throttle;
-                    this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
-                }
-
-                //Arcade Mode - Press Right Stick
-                if (this.robot.PiEMOSDigitalVals[7] == true)
-                {
-                    this.rightMotor.Throttle = (this.robot.PiEMOSAnalogVals[3] - this.robot.PiEMOSAnalogVals[1]) * 2 / 5 + 40;
-                    this.leftMotor.Throttle = (this.robot.PiEMOSAnalogVals[3] + this.robot.PiEMOSAnalogVals[1]) * 2 / 5 - 40;
-                }
-            }
-
-            else
-            {
-                //Tank Mode - Press Right Stick
-                if (this.robot.PiEMOSDigitalVals[7] == false)
-                {
-                    this.rightMotor.Throttle = this.robot.PiEMOSAnalogVals[1];
-                    this.leftMotor.Throttle = this.robot.PiEMOSAnalogVals[3];
-
-
-                    this.robot.FeedbackAnalogVals[0] = this.rightMotor.Throttle;
-                    this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
-                }
-
-                //Arcade Mode - Press Right Stick
-                if (this.robot.PiEMOSDigitalVals[7] == true)
-                {
-                    this.rightMotor.Throttle = (this.robot.PiEMOSAnalogVals[3] - this.robot.PiEMOSAnalogVals[0]);
-                    this.leftMotor.Throttle = (this.robot.PiEMOSAnalogVals[3] + this.robot.PiEMOSAnalogVals[0]);
-                }
-            }
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
         }
 
-
-       
         public void AutonomousCode()
         {
             Debug.Print("Autonomous");
