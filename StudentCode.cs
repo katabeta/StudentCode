@@ -56,7 +56,7 @@ namespace StudentPiER
         /// </summary>
         private AnalogSonarDistanceSensor sonar;
 
-         /// <summary>
+        /// <summary>
         /// The motor controlling the position of the hopper, on connector M2
         /// </summary>
         private GrizzlyBear hopperMotor;
@@ -83,7 +83,9 @@ namespace StudentPiER
         private GrizzlyEncoder leftEncoder;
         private GrizzlyEncoder rightEncoder;
 
-        //Step to use with the ^^ encoder
+        /// <summary>
+        /// Step to use with the ^^ encoder
+        /// </summary>
         private float Step = 0.0125f;
 
         /// <summary>
@@ -96,12 +98,11 @@ namespace StudentPiER
         /// </summary>
         private DigitalLimitSwitch closedSwitch;
 
-        //Create a new MicroMaestro and servos
+        /// <summary>
+        /// Create a new MicroMaestro and servos
+        /// </summary>
         private MicroMaestro mm;
         private ServoMotor servo0;
-
-        //new var for rfid fieldItme
-        public FieldItem fieldItem;
 
         /// <summary>
         ///   Initializes a new instance of the
@@ -122,6 +123,8 @@ namespace StudentPiER
             }
             this.leftMotor = new GrizzlyBear(robot, Watson.Motor.M0);
             this.rightMotor = new GrizzlyBear(robot, Watson.Motor.M1);
+            this.conveyorBeltMotor = new GrizzlyBear(robot, Watson.Motor.M3);
+            this.hopperMotor = new GrizzlyBear(robot, Watson.Motor.M2);
             this.sonar = new AnalogSonarDistanceSensor(robot, Watson.Analog.A5);
             this.leftEncoder = new GrizzlyEncoder(Step, this.leftMotor, this.robot);
             this.rightEncoder = new GrizzlyEncoder(Step, this.rightMotor, this.robot);
@@ -129,7 +132,6 @@ namespace StudentPiER
             this.openSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D2);
             this.mm = new MicroMaestro(robot, 1);
             this.servo0 = new ServoMotor(robot, mm, 0, 0, 75, 0);
-            this.conveyorBeltMotor = new GrizzlyBear(robot, Watson.Motor.M3);
         }
 
 
@@ -145,6 +147,7 @@ namespace StudentPiER
             Supervisor supervisor = new Supervisor(new StudentCode(robot));
             supervisor.RunCode();
         }
+
 
         /// <summary>
         ///  The Robot to use.
@@ -165,7 +168,6 @@ namespace StudentPiER
         /// new PiEMOS analog/digital values and then use them to update the
         /// actuator states
         /// </summary>
-
         public void SpeedAdjust()
         {
             double timeStart = this.stopwatch.ElapsedTime;
@@ -180,6 +182,14 @@ namespace StudentPiER
         }
 
 
+        /// <summary>
+        /// Determines throttle value based on the activation of precision mode
+        /// </summary>
+        /// <param name="baseThrottle">The input value from the controller. The analog value of the left and right sticks.</param>
+        /// <param name="slow">Whether slow mode is initiated or not</param>
+        /// <param name="deadpan">The margin for error in the released throttle</param>
+        /// <returns>The adjusted throttle value</returns>
+        /// Not being used
         public int GetTrueThrottle(int baseThrottle, Boolean slow, int deadpan)
         {
             if (!slow)
@@ -200,10 +210,11 @@ namespace StudentPiER
             }
         }
 
+
         /// <summary>
         /// Determines the position of the hopper door based on the activation of limit switches at the top and bottom of the hopper
         /// </summary>
-        /// <returns></returns> The position of the hopper door: open, closed, or in between
+        /// <returns>The position of the hopper door: open, closed, or in between</returns>
         public int hopperPosition()
         {
             if (this.closedSwitch.IsPressed == true && this.openSwitch.IsPressed == false)
@@ -222,13 +233,15 @@ namespace StudentPiER
             }
         }
 
+
         /// <summary>
         /// Uses the position of the hopper to determine the speed at which the motor should rotate when the driver elects to move the door
         /// </summary>
-        /// <returns></returns> A value of throttle for the hopper motor
+        /// <returns>A value of throttle for the hopper motor</returns>
         public int getTrueHopperThrottle()
         {
-            if (this.robot.PiEMOSDigitalVals[5] == true)
+            //Open hopper - Press and Hold Y
+            if (this.robot.PiEMOSDigitalVals[3] == true)
             {
                 return -20;
             }
@@ -241,28 +254,26 @@ namespace StudentPiER
         }
 
 
-        /// <summary>
-        /// The robot will call this method every time it needs to run the
-        /// autonomous student code
-        /// The StudentCode should basically treat this as a chance to change motorsw
-        /// and servos based on non user-controlled input like sensors. But you
-        /// don't need sensors, as this example demonstrates.
-        /// </summary>
         public void TeleoperatedCode()
         {
+            //Turn on/off slow mode
             this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
             this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
 
+
+            //key bindings for wheel throttle
+            //RightMotor - Right Stick y-axis
+            //LeftMotor - Right Stick x-axis
             this.robot.FeedbackAnalogVals[0] = this.rightMotor.Throttle;
             this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
 
+
+            //What button is this? What does this line do?
             this.robot.FeedbackAnalogVals[6] = (int)this.leftEncoder.Displacement;
 
-            this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[5];
 
-            //turn on conveyor belt - left stick
-            this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[6];
-            if (this.robot.FeedbackDigitalVals[6] == true)
+            //Turn on conveyor belt - Press Left Stick
+            if (this.robot.FeedbackDigitalVals[4] == true)
             {
                 this.conveyorBeltMotor.Throttle = 100;
             }
@@ -271,27 +282,25 @@ namespace StudentPiER
                 this.conveyorBeltMotor.Throttle = 0;
             }
 
-            //Enable the Rfid Scanner - Press Right Button.
+
+            //Open hopper - Press and Hold Y
+            this.hopperMotor.Throttle = getTrueHopperThrottle();        
+
+
+            //Send Rfid Code - Press and Hold Left Bumper
             if (this.robot.FeedbackDigitalVals[5] == true)
             {
-                
-
                 if (rfid.CurrentItemScanned != null)
                 {
-                    
-
-                    //Send Rfid Code - Press Left Button
-                    //Allow pilot to choose when to release code
-                    //Automates the process of choosing which code to release
+                    Debug.Print("Releasing Code");
                     this.robot.SendReleaseCode(this.rfid.CurrentItemScanned);
                     this.robot.StartFlashingDispenser(this.rfid.CurrentItemScanned);
                 }
             }
             else
-            {   
-                 Debug.Print("stopRelease");
-                 this.robot.StopFlashingDispenser(this.rfid.CurrentItemScanned);
-                
+            {
+                this.robot.StopFlashingDispenser(this.rfid.CurrentItemScanned);
+
             }
 
 
@@ -300,26 +309,18 @@ namespace StudentPiER
             //New Servos    
             servo0 = new ServoMotor(robot, mm, 0, 0, 90, 0);
 
-            servo0.AngularSpeed = 75;
-            servo0.TargetRotation = 90;
-
+            //Turn on servo - Press and Hold B
             if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 90)
             {
                 this.servo0.TargetRotation = 0;
+                this.servo0.AngularSpeed = 75;
             }
             else if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 0)
             {
                 this.servo0.TargetRotation = 90;
+                this.servo0.AngularSpeed = 75;
             }
 
-
-
-            //Debug.Print("Tele-op " + this.stopwatch.ElapsedTime);
-            this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
-            this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
-
-            this.robot.FeedbackAnalogVals[0] = this.rightMotor.Throttle;
-            this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
 
             //Regular Driving
             //Tank Mode - Press Right Stick
@@ -347,20 +348,27 @@ namespace StudentPiER
             }
         }
 
+
+        /// <summary>
+        /// The robot will call this method every time it needs to run the
+        /// autonomous student code
+        /// The StudentCode should basically treat this as a chance to change motorsw
+        /// and servos based on non user-controlled input like sensors. But you
+        /// don't need sensors, as this example demonstrates.
+        /// </summary>
         public void AutonomousCode()
         {
             Debug.Print("Autonomous");
-            //Max's set
             float leftDisplacement = this.leftEncoder.Displacement;
             float rightDisplacement = this.rightEncoder.Displacement;
             float TotalDisplacement = Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement);
 
-           
+
             this.robot.SendConsoleMessage("LeftDisplacement = " + (int)leftDisplacement);
             this.robot.SendConsoleMessage("RightDisplacement = " + (int)rightDisplacement);
             this.robot.SendConsoleMessage("TotalDisplacement = " + (Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement)));
+            
             int right = -1;
-            //int left = -1;
 
             //move forward initially
             if (TotalDisplacement < 20.0)
@@ -390,7 +398,7 @@ namespace StudentPiER
                 this.rightMotor.Throttle = right * 100;
                 this.leftMotor.Throttle = right * 100;
             }
-
+            //stop when reached location
             else
             {
                 this.rightMotor.Throttle = 0;
@@ -407,6 +415,8 @@ namespace StudentPiER
         public void DisabledAutonomousCode()
         {
             this.stopwatch.Reset(); // Restart stopwatch before start of autonomous
+
+            //reset encoder displacement values
             this.leftEncoder.Displacement = 0;
             this.rightEncoder.Displacement = 0;
         }
