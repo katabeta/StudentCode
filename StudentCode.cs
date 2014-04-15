@@ -288,7 +288,7 @@ namespace StudentPiER
 
 
             //Send Rfid Code - Press and Hold Left Bumper
-            if (this.robot.FeedbackDigitalVals[5] == true)
+            if (this.robot.FeedbackDigitalVals[1] == true)
             {
                 if (rfid.CurrentItemScanned != null)
                 {
@@ -310,12 +310,12 @@ namespace StudentPiER
             servo0 = new ServoMotor(robot, mm, 0, 0, 90, 0);
 
             //Turn on servo - Press and Hold B
-            if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 90)
+            if (this.robot.PiEMOSDigitalVals[5] == true && this.servo0.TargetRotation == 90)
             {
                 this.servo0.TargetRotation = 0;
                 this.servo0.AngularSpeed = 75;
             }
-            else if (this.robot.PiEMOSDigitalVals[1] == true && this.servo0.TargetRotation == 0)
+            else if (this.robot.PiEMOSDigitalVals[5] == true && this.servo0.TargetRotation == 0)
             {
                 this.servo0.TargetRotation = 90;
                 this.servo0.AngularSpeed = 75;
