@@ -256,7 +256,7 @@ namespace StudentPiER
 
         public void TeleoperatedCode()
         {
-            //Turn on/off slow mode
+            //Turn on/off slow mode - Press Left Stick
             this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
             this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
 
@@ -272,7 +272,7 @@ namespace StudentPiER
             this.robot.FeedbackAnalogVals[6] = (int)this.leftEncoder.Displacement;
 
 
-            //Turn on conveyor belt - Press Left Stick
+            //Turn on conveyor belt - Press Left Bumper
             if (this.robot.FeedbackDigitalVals[4] == true)
             {
                 this.conveyorBeltMotor.Throttle = 100;
