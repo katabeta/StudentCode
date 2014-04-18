@@ -91,12 +91,12 @@ namespace StudentPiER
         /// <summary>
         /// The limit switch for testing if the hopper is open, on connector D1
         /// </summary>
-        private DigitalLimitSwitch openSwitch;
+        private DigitalLimitSwitch autonomousSwitch;
 
         /// <summary>
-        /// The limit switch for testing if the hopper is closed, on connector D0
+        /// The limit switch for testing if the hopper is closed, on connector D2
         /// </summary>
-        private DigitalLimitSwitch closedSwitch;
+        private DigitalLimitSwitch servoSwitch;
 
         /// <summary>
         /// Create a new MicroMaestro and servos
@@ -128,8 +128,8 @@ namespace StudentPiER
             this.sonar = new AnalogSonarDistanceSensor(robot, Watson.Analog.A5);
             this.leftEncoder = new GrizzlyEncoder(Step, this.leftMotor, this.robot);
             this.rightEncoder = new GrizzlyEncoder(Step, this.rightMotor, this.robot);
-            this.closedSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D1);
-            this.openSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D2);
+            this.autonomousSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D1);
+            this.servoSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D2);
             this.mm = new MicroMaestro(robot, 1);
             this.servo0 = new ServoMotor(robot, mm, 0, 0, 75, 0);
         }
@@ -204,29 +204,6 @@ namespace StudentPiER
             {
                 return ((int)(baseThrottle * 0.4) - 40);
             }
-            else
-            {
-                return 0;
-            }
-        }
-
-
-        /// <summary>
-        /// Determines the position of the hopper door based on the activation of limit switches at the top and bottom of the hopper
-        /// </summary>
-        /// <returns>The position of the hopper door: open, closed, or in between</returns>
-        public int hopperPosition()
-        {
-            if (this.closedSwitch.IsPressed == true && this.openSwitch.IsPressed == false)
-            {
-                return 1;
-            }
-
-            else if (this.closedSwitch.IsPressed == false && this.openSwitch.IsPressed == true)
-            {
-                return 2;
-            }
-
             else
             {
                 return 0;
