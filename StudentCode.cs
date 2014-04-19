@@ -245,10 +245,6 @@ namespace StudentPiER
             this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
 
 
-            //What button is this? What does this line do?
-            this.robot.FeedbackAnalogVals[6] = (int)this.leftEncoder.Displacement;
-
-
             //Turn on conveyor belt - Press Left Bumper
             if (this.robot.FeedbackDigitalVals[4] == true)
             {
