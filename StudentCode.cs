@@ -130,7 +130,7 @@ namespace StudentPiER
             this.rightEncoder = new GrizzlyEncoder(Step, this.rightMotor, this.robot);
             this.autonomousSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D1);
             this.servoSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D2);
-            this.mm = new MicroMaestro(robot, 1);
+            this.mm = new MicroMaestro(robot, 12);
             this.servo0 = new ServoMotor(robot, mm, 0, 0, 75, 0);
         }
 
