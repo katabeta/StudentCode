@@ -246,7 +246,7 @@ namespace StudentPiER
             this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
 
 
-            //Turn on conveyor belt - Press Left Bumper
+            //Turn on conveyor belt - Hold right trigger
             this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[5];
             
             
@@ -404,6 +404,8 @@ namespace StudentPiER
                 this.rightMotor.Throttle = 0;
                 this.leftMotor.Throttle = 0;
             }*/
+            
+            //Stage 2 autonomous code - Hits wall and drops a ball onto the other side of the field
             if(startTime)
             {
                 this.stopwatch.Start();
