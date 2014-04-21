@@ -104,7 +104,11 @@ namespace StudentPiER
         private MicroMaestro mm;
         private ServoMotor servo0;
 
-        private Boolean startTime;
+        //For autonomous
+        private Boolean StartTime;
+
+        //For stage 3 autonomous
+        private int n;
 
         /// <summary>
         ///   Initializes a new instance of the
@@ -118,11 +122,11 @@ namespace StudentPiER
             this.robot = robot;
             this.stopwatch = new Stopwatch();
             this.stopwatch.Start();
-            this.useRfid = true;
-            if (this.useRfid)
+            this.useRfid = false;
+            /*if (this.useRfid)
             {
                 this.rfid = new Rfid(robot);
-            }
+            }*/
             this.leftMotor = new GrizzlyBear(robot, Watson.Motor.M0);
             this.rightMotor = new GrizzlyBear(robot, Watson.Motor.M1);
             this.conveyorBeltMotor = new GrizzlyBear(robot, Watson.Motor.M3);
@@ -132,7 +136,10 @@ namespace StudentPiER
             this.rightEncoder = new GrizzlyEncoder(Step, this.rightMotor, this.robot);
             this.autonomousSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D1);
             this.servoSwitch = new DigitalLimitSwitch(robot, Watson.Digital.D2);
-            this.startTime = false;
+            this.StartTime = true;
+            this.mm = new MicroMaestro(robot, 12);   
+            this.servo0 = new ServoMotor(robot, mm, 0, 500, 2500);
+            this.n = 0;
         }
 
 
@@ -246,7 +253,7 @@ namespace StudentPiER
             this.robot.FeedbackAnalogVals[1] = this.leftMotor.Throttle;
 
 
-            //Turn on conveyor belt - Hold right trigger
+            //Turn on conveyor belt - Press and Hold Left Trigger
             this.conveyorBeltMotor.Throttle = this.robot.PiEMOSAnalogVals[5];
             
             
@@ -255,7 +262,7 @@ namespace StudentPiER
             
 
             //Start Flashing Dispensor and compare release code - Press and Hold B
-            if (this.robot.PiEMOSDigitalVals[1] == true)
+            /*if (this.robot.PiEMOSDigitalVals[1] == true)
             {
                 ReportFieldItemType(this.rfid.LastItemScanned);
                 this.robot.SendConsoleMessage("Releasing Code");
@@ -281,13 +288,8 @@ namespace StudentPiER
                         this.robot.StopFlashingDispenser(this.rfid.LastItemScanned);
                     }
                 }
-            }
+            }*/
 
-
-            //New MicroMaestros
-            mm = new MicroMaestro(robot, 12);
-            //New Servos    
-            servo0 = new ServoMotor(robot, mm, 0, 0, 90);
 
             //Turn on servo - Press and Hold Right Bumper
             if (this.robot.PiEMOSDigitalVals[5] == true && this.servo0.TargetRotation == 90)
@@ -299,13 +301,13 @@ namespace StudentPiER
             else if (this.robot.PiEMOSDigitalVals[5] == true && this.servo0.TargetRotation == 0)
             {
                 this.servo0.TargetRotation = 90;
-                this.servo0.AngularSpeed = 75;
+                this.servo0.AngularSpeed = 250;
                 this.robot.SendConsoleMessage(this.servo0.TargetRotation.ToString());
             }
             else if (this.robot.PiEMOSDigitalVals[5] == true && this.servo0.TargetRotation != 0 || this.servo0.TargetRotation != 90)
             {
                 this.servo0.TargetRotation = 0;
-                this.servo0.AngularSpeed = 75;
+                this.servo0.AngularSpeed = 250;
                 this.robot.SendConsoleMessage(this.servo0.TargetRotation.ToString());
             }
 
@@ -345,7 +347,7 @@ namespace StudentPiER
         /// </summary>
         public void AutonomousCode()
         {
-            /*Debug.Print("Autonomous");
+            Debug.Print("Autonomous");
             float leftDisplacement = this.leftEncoder.Displacement;
             float rightDisplacement = this.rightEncoder.Displacement;
             float TotalDisplacement = Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement);
@@ -357,14 +359,90 @@ namespace StudentPiER
             
 
 
-            this.robot.SendConsoleMessage("LeftDisplacement = " + (int)leftDisplacement);
-            this.robot.SendConsoleMessage("RightDisplacement = " + (int)rightDisplacement);
+
             this.robot.SendConsoleMessage("TotalDisplacement = " + (Math.Abs((int)this.leftEncoder.Displacement) + Math.Abs((int)this.rightEncoder.Displacement)));
             
             int right = -1;
+            this.hopperMotor.Throttle = 60;
 
+
+            //stage 3 autonomous - getting ball into goal
+            switch (n)
+            {
+                case 0:
+                    if (TotalDisplacement < 20.0)
+                    {
+                        this.robot.SendConsoleMessage("Forward");
+                        this.rightMotor.Throttle = right * 100;
+                        this.leftMotor.Throttle = right * -100;
+                    }
+                    else
+                    {
+                        n = n + 1;
+                    }
+            
+                    break;
+                case 1:
+                    if (TotalDisplacement < 25.0)
+                    {
+                        this.robot.SendConsoleMessage("Turn Left");
+                        this.rightMotor.Throttle = right * -100;
+                        this.leftMotor.Throttle = 0;
+                    }
+                    else
+                    {
+                        n = n + 1;
+                    }
+                    break;
+                case 2:
+                    if (TotalDisplacement < 29.3)
+                    {
+                        this.robot.SendConsoleMessage("Staigheten");
+                        this.rightMotor.Throttle = 100;
+                        this.leftMotor.Throttle = -100;
+                    }
+                    else
+                    {
+                        n = n + 1;
+                    }
+                    break;
+                case 3:
+                    if (TotalDisplacement < 60.0)
+                    {
+                        this.robot.SendConsoleMessage("Forward 2");
+                        this.rightMotor.Throttle = right * 100;
+                        this.leftMotor.Throttle = right * -100;
+                    }
+                    else
+                    {
+                        n = n + 1;
+                    }
+                    break;
+                case 4:
+                    if (TotalDisplacement < 69.5)
+                    {
+                        this.robot.SendConsoleMessage("Turn Right");
+                        this.rightMotor.Throttle = 0;
+                        this.leftMotor.Throttle = right * 100;
+                    }
+                    else
+                    {
+                        n = n + 1;
+                    }
+                    break;
+                case 5:
+                    this.robot.SendConsoleMessage("Conveyor - On");
+                    this.robot.SendConsoleMessage("Hopper - Open");
+                    this.hopperMotor.Throttle = -20;
+                    this.conveyorBeltMotor.Throttle = 100;
+                    break;
+                default:
+                    this.rightMotor.Throttle = 0;
+                    this.leftMotor.Throttle = 0;
+                    break;
+            }
             //move forward initially
-            if (TotalDisplacement < 20.0)
+            /*if (TotalDisplacement < 20.0)
             {
                 this.robot.SendConsoleMessage("Forward");
                 this.rightMotor.Throttle = right * 100;
@@ -374,8 +452,8 @@ namespace StudentPiER
             else if (TotalDisplacement < 25.0)
             {
                 this.robot.SendConsoleMessage("Turn Left");
-                this.rightMotor.Throttle = 0;
-                this.leftMotor.Throttle = right * -100;
+                this.rightMotor.Throttle = right * -100;
+                this.leftMotor.Throttle = 0;
             }
             //straighten against wall
             else if (TotalDisplacement < 29.3)
@@ -395,8 +473,8 @@ namespace StudentPiER
             else if (TotalDisplacement < 69.5)
             {
                 this.robot.SendConsoleMessage("Turn Right");
-                this.rightMotor.Throttle = right * 100;
-                this.leftMotor.Throttle = 0;
+                this.rightMotor.Throttle = 0;
+                this.leftMotor.Throttle = right * 100;
             }
             //stop when reached location
             else
@@ -404,22 +482,22 @@ namespace StudentPiER
                 this.rightMotor.Throttle = 0;
                 this.leftMotor.Throttle = 0;
             }*/
-            
-            //Stage 2 autonomous code - Hits wall and drops a ball onto the other side of the field
-            if(startTime)
+
+            //Stage 2 autonomous - getting ball over wall
+            /*if (StartTime)
             {
                 this.stopwatch.Start();
-                startTime = false;
+                StartTime = false;
             }
             this.robot.SendConsoleMessage(this.stopwatch.ElapsedTime.ToString());
-            this.rightMotor.Throttle = -70;
-            this.leftMotor.Throttle = 70;
+            this.rightMotor.Throttle = -90;
+            this.leftMotor.Throttle = 90;
             this.hopperMotor.Throttle = 60;
             if (this.stopwatch.ElapsedTime >= 5.0)
             {
                 this.conveyorBeltMotor.Throttle = 100;
                 this.hopperMotor.Throttle = -20;
-            }
+            }*/
         }
 
 
@@ -438,7 +516,7 @@ namespace StudentPiER
             this.rightMotor.Throttle = GetTrueThrottle(this.robot.PiEMOSAnalogVals[1], this.robot.PiEMOSDigitalVals[6], 5);
             this.leftMotor.Throttle = -1 * GetTrueThrottle(this.robot.PiEMOSAnalogVals[3], this.robot.PiEMOSDigitalVals[6], 5);
             this.stopwatch.Reset();
-            this.startTime = true;
+            this.StartTime = true;
         }
 
         /// <summary>
