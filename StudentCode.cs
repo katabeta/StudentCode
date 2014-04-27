@@ -266,7 +266,7 @@ namespace StudentPiER
             //Start Flashing Dispensor and compare release code - Press and Hold RB
             if (this.robot.PiEMOSDigitalVals[5] == true)
             {
-                this.robot.SendConsoleMessage("Releasing Code");
+                this.robot.SendConsoleMessage("RFID On");
                 this.useRfid = true;
                 
                 //Check if lastItemScanned was a false release code
@@ -276,6 +276,7 @@ namespace StudentPiER
                 if (this.rfid.LastItemScanned != null && equalsFalse == false)
                 {
                     //Find which dispenser this release code corresponds to
+                    this.robot.SendConsoleMessage("Card scanned)")
                     this.robot.StartFlashingDispenser(this.rfid.LastItemScanned);
                     Debug.Print(this.rfid.LastItemScanned.ItemId.ToString());
 
