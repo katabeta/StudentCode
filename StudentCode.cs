@@ -268,7 +268,6 @@ namespace StudentPiER
             {
                 this.robot.SendConsoleMessage("Releasing Code");
                 this.useRfid = true;
-                ReportFieldItemType(this.rfid.LastItemScanned);
                 
                 //Check if lastItemScanned was a false release code
                 bool equalsFalse = FieldItem.FalseReleaseCode.Equals(this.rfid.LastItemScanned);
